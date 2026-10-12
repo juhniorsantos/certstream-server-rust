@@ -1379,6 +1379,7 @@ pub async fn run_static_ct_watcher(log: CtLog, ctx: WatcherContext) {
                 tree_size,
                 health.total_errors(),
             );
+            behind_since = None;
             sleep(super::idle_poll_delay(
                 poll_interval,
                 unchanged_polls,
