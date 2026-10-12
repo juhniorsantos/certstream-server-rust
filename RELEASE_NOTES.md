@@ -1,5 +1,11 @@
 # Release Notes
 
+## v1.6.7: A caught-up watcher forgets how long it was behind
+
+**Release date:** October 12, 2026
+
+v1.6.6 capped the delay held against `CERTSTREAM_CT_LOG_MAX_CATCHUP_LAG_SECS` by the time since the watcher fell behind, but only cleared that time when a drain ran to the head. A drain that stopped on a 429 or on the 30 second head refresh, followed by a poll that found the watcher caught up, left the old time in place. On the production container Cloudflare Nimbus2027 began a drain at 13:56 UTC, caught up by 14:02 and then skipped 508,419 entries at 15:57, three minutes after its next head arrived, because the time behind still counted from 13:56. The time is now cleared by any poll that finds the watcher caught up, in the RFC 6962 and static-CT watchers.
+
 ## v1.6.6: The delay bound counts time behind, not entry age
 
 **Release date:** October 9, 2026
