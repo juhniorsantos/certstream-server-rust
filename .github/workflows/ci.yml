@@ -416,6 +416,49 @@ jobs:
           git commit -m "certstream-server-rust ${version}" || { echo "formula unchanged"; exit 0; }
           git push
 
+  # Publishes the crate to crates.io once the build and tests pass. Needs
+  # CARGO_REGISTRY_TOKEN; without it the job does nothing.
+  crates-io:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check for registry token
+        id: gate
+        env:
+          TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "no CARGO_REGISTRY_TOKEN, skipping crates.io publish"
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Rust
+        if: steps.gate.outputs.run == 'true'
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Publish
+        if: steps.gate.outputs.run == 'true'
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          crate_version="$(grep -m1 '^version' Cargo.toml | cut -d'"' -f2)"
+          if [ "$version" != "$crate_version" ]; then
+            echo "tag ${GITHUB_REF_NAME} does not match Cargo.toml version ${crate_version}"
+            exit 1
+          fi
+          if curl -fsS -A "${GITHUB_REPOSITORY}" \
+               "https://crates.io/api/v1/crates/certstream-server-rust/${version}" >/dev/null 2>&1; then
+            echo "${version} is already on crates.io"
+            exit 0
+          fi
+          cargo publish --locked
+
   # Publishes the APT and DNF repositories to reloading01/packages (gh-pages).
   # The branch is rewritten as a single orphan commit each time, so package
   # files never accumulate in git history; the previous contents are carried
