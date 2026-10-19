@@ -128,8 +128,10 @@
                         <div class="code-example-header"><span class="lang">Python</span></div>
                         <pre>import asyncio, json, websockets
 
+URL = "wss://api.certstream.dev/"
+
 async def main():
-    async with websockets.connect("wss://api.certstream.dev/") as ws:
+    async with websockets.connect(URL) as ws:
         async for message in ws:
             event = json.loads(message)
             if event["message_type"] == "dns_entries":
