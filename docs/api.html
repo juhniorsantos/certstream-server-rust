@@ -119,8 +119,8 @@
                 <table class="endpoints-table">
                     <thead><tr><th>Endpoint</th><th>Stream</th><th>Size per certificate</th></tr></thead>
                     <tbody>
-                        <tr><td><code>wss://api.certstream.dev/domains-only</code></td><td>Domain names only</td><td>~200 B</td></tr>
-                        <tr><td><code>wss://api.certstream.dev/</code></td><td>Lite, without DER and chain</td><td>~1 KB</td></tr>
+                        <tr><td><code>wss://api.certstream.dev/</code></td><td>Domain names only (default)</td><td>~200 B</td></tr>
+                        <tr><td><code>wss://api.certstream.dev/lite</code></td><td>Lite, without DER and chain</td><td>~1 KB</td></tr>
                     </tbody>
                 </table>
                 <div class="code-examples">
@@ -129,7 +129,7 @@
                         <pre>import asyncio, json, websockets
 
 async def main():
-    async with websockets.connect("wss://api.certstream.dev/domains-only") as ws:
+    async with websockets.connect("wss://api.certstream.dev/") as ws:
         async for message in ws:
             event = json.loads(message)
             if event["message_type"] == "dns_entries":
@@ -139,7 +139,7 @@ asyncio.run(main())</pre>
                     </div>
                     <div class="code-example">
                         <div class="code-example-header"><span class="lang">JavaScript</span></div>
-                        <pre>const ws = new WebSocket("wss://api.certstream.dev/domains-only");
+                        <pre>const ws = new WebSocket("wss://api.certstream.dev/");
 ws.onmessage = (e) => {
   const event = JSON.parse(e.data);
   if (event.message_type === "dns_entries") console.log(event.data);
@@ -147,7 +147,7 @@ ws.onmessage = (e) => {
                     </div>
                     <div class="code-example">
                         <div class="code-example-header"><span class="lang">websocat</span></div>
-                        <pre>websocat wss://api.certstream.dev/domains-only</pre>
+                        <pre>websocat wss://api.certstream.dev/</pre>
                     </div>
                 </div>
             </div>
@@ -160,7 +160,7 @@ ws.onmessage = (e) => {
                 <table class="endpoints-table">
                     <thead><tr><th>Item</th><th>Value</th></tr></thead>
                     <tbody>
-                        <tr><td>Concurrent connections per IP</td><td>5. A sixth connection is refused with HTTP 429.</td></tr>
+                        <tr><td>Concurrent connections per IP</td><td>2. A third connection is refused with HTTP 429.</td></tr>
                         <tr><td>Availability (SLA)</td><td>99.9%</td></tr>
                     </tbody>
                 </table>
