@@ -11,14 +11,17 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Public API - live certificate stream at api.certstream.dev</title>
-    <meta name="description" content="Free public Certificate Transparency stream at api.certstream.dev over WebSocket, with live connection and bandwidth numbers.">
+    <title>Free CertStream API - Real-Time Certificate Transparency</title>
+    <meta name="description" content="Free hosted CertStream API. Stream new TLS certificates and domain names in real time over WebSocket. No API key or sign-up. Works with certstream clients.">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://certstream.dev/api.html">
+    <link rel="canonical" href="https://certstream.dev/free-certstream-api.html">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://certstream.dev/api.html">
-    <meta property="og:title" content="certstream public API">
-    <meta property="og:description" content="Free Certificate Transparency stream over WebSocket, with live usage numbers.">
+    <meta property="og:url" content="https://certstream.dev/free-certstream-api.html">
+    <meta property="og:title" content="Free CertStream API - Real-Time Certificate Transparency">
+    <meta property="og:description" content="Free hosted CertStream API. Stream new TLS certificates and domain names in real time over WebSocket. No API key or sign-up. Works with certstream clients.">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Free CertStream API - Real-Time Certificate Transparency">
+    <meta name="twitter:description" content="Free hosted CertStream API. Stream new TLS certificates and domain names in real time over WebSocket. No API key or sign-up. Works with certstream clients.">
     <meta name="theme-color" content="#ffffff">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -45,6 +48,62 @@
       })();
     </script>
     <link rel="stylesheet" href="styles.css">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is the CertStream API really free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. The domains-only and lite streams are free and need no API key or sign-up."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do I need an API key?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Open a WebSocket connection to the endpoint and certificates start arriving."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I use it with existing CertStream clients?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. The lite stream uses the same message format as the original CertStream, so a client only needs its URL changed to wss://api.certstream.dev/lite. The Python certstream library works this way."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the difference between domains-only and lite?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Domains-only sends just the domain names of each certificate, about 200 bytes per message. Lite adds the issuer, validity dates, fingerprints and log source, about 1 KB per message."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which Certificate Transparency logs does it read?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The Chrome- and Apple-trusted CT logs, both RFC 6962 and static-ct-api, with certificates that appear in more than one log delivered once."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I get the full stream with the DER certificate and chain?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Not on the public endpoint. You can run your own instance of certstream-server-rust, which serves it."
+          }
+        }
+      ]
+    }
+    </script>
 </head>
 <body>
     <header>
@@ -55,7 +114,7 @@
                     <li><a href="/">Home</a></li>
                     <li><a href="docs.html">API Docs</a></li>
                     <li><a href="quickstart.html">Quick Start</a></li>
-                    <li><a href="api.html" class="active">Public API</a></li>
+                    <li><a href="free-certstream-api.html" class="active">Free API</a></li>
                     <li><a href="architecture.html">Architecture</a></li>
                 </ul>
             </nav>
@@ -79,7 +138,7 @@
             <li><a href="/">Home</a></li>
             <li><a href="docs.html">API Docs</a></li>
             <li><a href="quickstart.html">Quick Start</a></li>
-                    <li><a href="api.html" class="active">Public API</a></li>
+                    <li><a href="free-certstream-api.html" class="active">Free API</a></li>
             <li><a href="architecture.html">Architecture</a></li>
             <li><a href="https://github.com/reloading01/certstream-server-rust" target="_blank" rel="noopener">GitHub</a></li>
         </ul>
@@ -88,8 +147,8 @@
     <main>
         <div class="wrap">
             <div class="page-header">
-                <h1>Public API</h1>
-                <p>A free, keyless Certificate Transparency stream at api.certstream.dev.</p>
+                <h1>Free CertStream API</h1>
+                <p>A free, hosted, CertStream-compatible WebSocket API. Get every new TLS certificate and domain name from Certificate Transparency logs in real time. No API key, no sign-up.</p>
             </div>
         </div>
 
@@ -113,8 +172,8 @@
         <section>
             <div class="wrap">
                 <div class="section-header">
-                    <h2>Connect</h2>
-                    <p>No key and no sign-up. Certificates arrive as JSON text frames in the <a href="docs.html">same format as the self-hosted server</a>.</p>
+                    <h2>Connect to the CertStream WebSocket</h2>
+                    <p>Certificates arrive as JSON text frames in the <a href="docs.html">same format as the self-hosted server</a>.</p>
                 </div>
                 <table class="endpoints-table">
                     <thead><tr><th>Endpoint</th><th>Stream</th><th>Size per certificate</th></tr></thead>
@@ -154,6 +213,75 @@ ws.onmessage = (e) => {
                 </div>
             </div>
         </section>
+
+        <section>
+            <div class="wrap">
+                <div class="section-header">
+                    <h2>Use it with existing CertStream clients</h2>
+                    <p>Point a client that already speaks CertStream at the lite endpoint. Only the URL changes.</p>
+                </div>
+                <div class="code-example">
+                    <div class="code-example-header"><span class="lang">Python</span><span class="tag">certstream library</span></div>
+                    <pre>import certstream
+
+def on_message(message, context):
+    if message["message_type"] == "certificate_update":
+        print(message["data"]["leaf_cert"]["all_domains"])
+
+certstream.listen_for_events(on_message, url="wss://api.certstream.dev/lite")</pre>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="wrap">
+                <div class="section-header">
+                    <h2>Message format</h2>
+                </div>
+                <div class="code-examples">
+                    <div class="code-example">
+                        <div class="code-example-header"><span class="lang">domains-only</span><span class="tag">/</span></div>
+                        <pre>{
+  "message_type": "dns_entries",
+  "data": ["example.com", "*.example.com"]
+}</pre>
+                    </div>
+                    <div class="code-example">
+                        <div class="code-example-header"><span class="lang">lite</span><span class="tag">/lite, abbreviated</span></div>
+                        <pre>{
+  "message_type": "certificate_update",
+  "data": {
+    "update_type": "PrecertLogEntry",
+    "leaf_cert": {
+      "issuer": { "CN": "Amazon RSA 2048 S09" },
+      "not_before": 1792405638,
+      "not_after": 1796297238,
+      "all_domains": ["example.com"]
+    },
+    "seen": 1792409244.748,
+    "source": { "name": "DigiCert Sphinx2026h2" }
+  }
+}</pre>
+                    </div>
+                </div>
+                <p>Every field is described in the <a href="docs.html">API documentation</a>.</p>
+            </div>
+        </section>
+
+        <section>
+            <div class="wrap">
+                <div class="section-header">
+                    <h2>What people use it for</h2>
+                </div>
+                <div class="features-list">
+                    <div class="feature-item"><h3>Phishing and typosquat detection</h3><p>Match new domains against lookalikes of a brand as certificates are issued.</p></div>
+                    <div class="feature-item"><h3>Brand monitoring</h3><p>Get notified when a certificate appears for a name that contains yours.</p></div>
+                    <div class="feature-item"><h3>Subdomain discovery</h3><p>Collect new hostnames under domains you track, before they show up anywhere else.</p></div>
+                    <div class="feature-item"><h3>Threat intelligence</h3><p>Feed newly registered and newly certified domains into your own pipeline.</p></div>
+                </div>
+            </div>
+        </section>
+
         <section>
             <div class="wrap">
                 <div class="section-header">
@@ -166,6 +294,26 @@ ws.onmessage = (e) => {
                         <tr><td>Availability (SLA)</td><td>99.9%</td></tr>
                     </tbody>
                 </table>
+            </div>
+        </section>
+
+        <section>
+            <div class="wrap">
+                <div class="section-header">
+                    <h2>Frequently asked questions</h2>
+                </div>
+                <div class="faq">
+                    <div class="faq-item"><h3>Is the CertStream API really free?</h3><p>Yes. The domains-only and lite streams are free and need no API key or sign-up.</p></div>
+                    <div class="faq-item"><h3>Do I need an API key?</h3><p>No. Open a WebSocket connection to the endpoint and certificates start arriving.</p></div>
+                    <div class="faq-item"><h3>Can I use it with existing CertStream clients?</h3><p>Yes. The lite stream uses the same message format as the original CertStream, so a client only needs its URL changed to wss://api.certstream.dev/lite. The Python certstream library works this way.</p></div>
+                    <div class="faq-item"><h3>What is the difference between domains-only and lite?</h3><p>Domains-only sends just the domain names of each certificate, about 200 bytes per message. Lite adds the issuer, validity dates, fingerprints and log source, about 1 KB per message.</p></div>
+                    <div class="faq-item"><h3>Which Certificate Transparency logs does it read?</h3><p>The Chrome- and Apple-trusted CT logs, both RFC 6962 and static-ct-api, with certificates that appear in more than one log delivered once.</p></div>
+                    <div class="faq-item"><h3>Can I get the full stream with the DER certificate and chain?</h3><p>Not on the public endpoint. You can run your own instance of certstream-server-rust, which serves it.</p></div>
+                </div>
+                <p>
+                    Want to run it yourself? See the <a href="quickstart.html">quick start</a> or the
+                    <a href="https://github.com/reloading01/certstream-server-rust" target="_blank" rel="noopener">certstream-server-rust</a> repository.
+                </p>
             </div>
         </section>
     </main>
