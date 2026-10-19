@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="760" height="330" viewBox="0 0 760 330" role="img" aria-label="Terminal session: websocat connects to wss://api.certstream.dev/domains-only and prints newly issued certificate domains as they arrive">
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="288" viewBox="0 0 600 288" role="img" aria-label="Terminal session: websocat connects to wss://api.certstream.dev/domains-only and prints newly issued certificate domains as they arrive">
 <style>
 .m{font:13px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;fill:#e7e3d6;white-space:pre}
 .d{fill:#8d8979}.k{fill:#d68b56}.s{fill:#9bb074}
@@ -15,18 +15,18 @@
 .l8{animation:s8 16.0s infinite;opacity:0}@keyframes s8{0%,63.75%{opacity:0}64.69%,92.5%{opacity:1}95.62%,100%{opacity:0}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;opacity:1!important}}
 </style>
-<rect width="760" height="330" rx="8" fill="#1b1b19"/>
-<rect width="760" height="36" rx="8" fill="#262624"/><rect y="28" width="760" height="8" fill="#262624"/>
+<rect width="600" height="288" rx="8" fill="#1b1b19"/>
+<rect width="600" height="36" rx="8" fill="#262624"/><rect y="28" width="600" height="8" fill="#262624"/>
 <circle cx="20" cy="18" r="5" fill="#383835"/><circle cx="38" cy="18" r="5" fill="#383835"/><circle cx="56" cy="18" r="5" fill="#383835"/>
-<text class="m d" x="380" y="22" text-anchor="middle">certstream</text>
+<text class="m d" x="300" y="22" text-anchor="middle">certstream</text>
 <text class="cmd m" x="24" y="62"><tspan class="d">$</tspan> websocat wss://api.certstream.dev/domains-only</text>
-<text class="l0 m" x="24" y="88">{"<tspan class="k">message_type</tspan>":"<tspan class="s">dns_entries</tspan>","<tspan class="k">data</tspan>":["<tspan class="s">info.rebrandly.com</tspan>"]}</text>
-<text class="l1 m" x="24" y="112">{"<tspan class="k">message_type</tspan>":"<tspan class="s">dns_entries</tspan>","<tspan class="k">data</tspan>":["<tspan class="s">staging.open-law.de</tspan>"]}</text>
-<text class="l2 m" x="24" y="136">{"<tspan class="k">message_type</tspan>":"<tspan class="s">dns_entries</tspan>","<tspan class="k">data</tspan>":["<tspan class="s">fabrikativ.at</tspan>","<tspan class="s">www.fabrikativ.at</tspan>"]}</text>
-<text class="l3 m" x="24" y="160">{"<tspan class="k">message_type</tspan>":"<tspan class="s">dns_entries</tspan>","<tspan class="k">data</tspan>":["<tspan class="s">chatbot.colaraz.net</tspan>"]}</text>
-<text class="l4 m" x="24" y="184">{"<tspan class="k">message_type</tspan>":"<tspan class="s">dns_entries</tspan>","<tspan class="k">data</tspan>":["<tspan class="s">core.vinted.at</tspan>"]}</text>
-<text class="l5 m" x="24" y="208">{"<tspan class="k">message_type</tspan>":"<tspan class="s">dns_entries</tspan>","<tspan class="k">data</tspan>":["<tspan class="s">v3.novamarket.io</tspan>"]}</text>
-<text class="l6 m" x="24" y="232">{"<tspan class="k">message_type</tspan>":"<tspan class="s">dns_entries</tspan>","<tspan class="k">data</tspan>":["<tspan class="s">dev3.pstw.com.my</tspan>"]}</text>
-<text class="l7 m" x="24" y="256">{"<tspan class="k">message_type</tspan>":"<tspan class="s">dns_entries</tspan>","<tspan class="k">data</tspan>":["<tspan class="s">panel.alfalah.systems</tspan>"]}</text>
-<text class="l8 m" x="24" y="280">{"<tspan class="k">message_type</tspan>":"<tspan class="s">dns_entries</tspan>","<tspan class="k">data</tspan>":["<tspan class="s">www.artmie.nl</tspan>"]}</text>
+<text class="l0 m" x="24" y="84">{"<tspan class="k">message_type</tspan>":"<tspan class="s">dns_entries</tspan>","<tspan class="k">data</tspan>":["<tspan class="s">info.rebrandly.com</tspan>"]}</text>
+<text class="l1 m" x="24" y="106">{"<tspan class="k">message_type</tspan>":"<tspan class="s">dns_entries</tspan>","<tspan class="k">data</tspan>":["<tspan class="s">staging.open-law.de</tspan>"]}</text>
+<text class="l2 m" x="24" y="128">{"<tspan class="k">message_type</tspan>":"<tspan class="s">dns_entries</tspan>","<tspan class="k">data</tspan>":["<tspan class="s">fabrikativ.at</tspan>","<tspan class="s">www.fabrikativ.at</tspan>"]}</text>
+<text class="l3 m" x="24" y="150">{"<tspan class="k">message_type</tspan>":"<tspan class="s">dns_entries</tspan>","<tspan class="k">data</tspan>":["<tspan class="s">chatbot.colaraz.net</tspan>"]}</text>
+<text class="l4 m" x="24" y="172">{"<tspan class="k">message_type</tspan>":"<tspan class="s">dns_entries</tspan>","<tspan class="k">data</tspan>":["<tspan class="s">core.vinted.at</tspan>"]}</text>
+<text class="l5 m" x="24" y="194">{"<tspan class="k">message_type</tspan>":"<tspan class="s">dns_entries</tspan>","<tspan class="k">data</tspan>":["<tspan class="s">v3.novamarket.io</tspan>"]}</text>
+<text class="l6 m" x="24" y="216">{"<tspan class="k">message_type</tspan>":"<tspan class="s">dns_entries</tspan>","<tspan class="k">data</tspan>":["<tspan class="s">dev3.pstw.com.my</tspan>"]}</text>
+<text class="l7 m" x="24" y="238">{"<tspan class="k">message_type</tspan>":"<tspan class="s">dns_entries</tspan>","<tspan class="k">data</tspan>":["<tspan class="s">panel.alfalah.systems</tspan>"]}</text>
+<text class="l8 m" x="24" y="260">{"<tspan class="k">message_type</tspan>":"<tspan class="s">dns_entries</tspan>","<tspan class="k">data</tspan>":["<tspan class="s">www.artmie.nl</tspan>"]}</text>
 </svg>
