@@ -538,3 +538,10 @@ footer .colophon { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; 
     :root:not([data-theme="light"]) .theme-toggle .moon { display: block; }
     :root:not([data-theme="light"]) .theme-toggle .sun { display: none; }
 }
+
+/* ---------- live usage panel ---------- */
+.live-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+.live-stat { padding: 20px; display: flex; flex-direction: column; gap: 6px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.live-label { font-size: 0.82rem; color: var(--ink-3); }
+.live-value { font-family: 'IBM Plex Mono', monospace; font-size: 1.6rem; font-weight: 500; color: var(--ink); line-height: 1.2; }
+.live-status { margin-top: 14px; font-size: 0.85rem; color: var(--ink-3); }
