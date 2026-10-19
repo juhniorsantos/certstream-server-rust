@@ -89,15 +89,7 @@ See [RELEASE_NOTES.md](RELEASE_NOTES.md) for version history.
 
 ## Contributing
 
-Bug reports, CT log quirks, and pull requests are welcome. Open an [issue](https://github.com/reloading01/certstream-server-rust/issues) first for larger changes so the approach can be agreed before you write code.
-
-```bash
-git clone https://github.com/reloading01/certstream-server-rust
-cd certstream-server-rust
-cargo test --release
-```
-
-CI builds and tests with stable Rust. When you fix a bug, add a test that fails without the fix. If a change touches CT log fetching, check it against live logs as well, since unit tests do not reproduce operator behaviour. Use [Conventional Commits](https://www.conventionalcommits.org/) for commit messages (`fix(ct): ...`).
+Bug reports, CT log quirks, and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to build, test, and send a change.
 
 ## Support
 
