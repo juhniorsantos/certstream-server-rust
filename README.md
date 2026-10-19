@@ -33,6 +33,8 @@ Key features:
 
 Full API documentation, client examples, integration guides, and self-hosting notes are available at [certstream.dev](https://certstream.dev/).
 
+Want the stream without running a server? There is a [free hosted CertStream API](https://certstream.dev/free-certstream-api.html) at `wss://api.certstream.dev/`.
+
 ## Installation
 
 Prebuilt Linux binaries use static musl builds and do not depend on the host glibc version. Release archives include SHA-256 checksums.
