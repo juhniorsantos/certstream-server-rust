@@ -85,7 +85,7 @@
             <nav>
                 <ul class="nav-links">
                     <li><a href="/">Home</a></li>
-                    <li><a href="docs.html" class="active">API Docs</a></li>
+                    <li><a href="docs.html" class="active">Docs</a></li>
                     <li><a href="quickstart.html">Quick Start</a></li>
                     <li><a href="free-certstream-api.html">Free API</a></li>
                     <li><a href="architecture.html">Architecture</a></li>
@@ -109,7 +109,7 @@
         </div>
         <ul class="mobile-nav-links">
             <li><a href="/">Home</a></li>
-            <li><a href="docs.html" class="active">API Docs</a></li>
+            <li><a href="docs.html" class="active">Docs</a></li>
             <li><a href="quickstart.html">Quick Start</a></li>
             <li><a href="free-certstream-api.html">Free API</a></li>
             <li><a href="architecture.html">Architecture</a></li>
@@ -398,9 +398,8 @@ curl -N 'http://localhost:8080/sse?stream=lite&amp;domain=example.com&amp;issuer
                     </tbody>
                 </table>
 <pre><code>CERTSTREAM_STATIC_CT_MERKLE_VERIFICATION=full certstream-server-rust</code></pre>
-                <p style="margin-top: 1rem;">If a tile cannot be fetched (a 429, a timeout, or a partial tile at the head of the log that has no full tile yet), the entry is treated as unverified rather than invalid: it is marked <code>inclusion: unverified</code> and delivery continues. A partial tile the log has since deleted is read from the full tile instead. Only a hash mismatch drops the tile. The two outcomes are counted separately as <code>certstream_static_ct_inclusion_unavailable</code> and <code>certstream_static_ct_inclusion_failed</code>, with the same split for consistency.</p>
-                <p>Verification fetches use the same per-operator rate limiter as ingest, so enabling this does not increase the request rate an operator sees. The cost is that ingest gets a smaller share of that budget; in a 12 minute test at the former 500 ms default, the share of new static-CT entries read fell from about 100% to 47% for Let's Encrypt and 64% for IPng Networks. Consistency is anchored on the first checkpoint of each process; the previous root is held in memory rather than the state file, so a restart re-anchors instead of proving continuity across it.</p>
-                <p>Measured over 80 seconds against the live static-CT log set: 36,570 entries verified as included and 78 consistency proofs verified, with 11 tiles and 4 proofs unavailable and no mismatches.</p>
+                <p style="margin-top: 1rem;">If a tile cannot be fetched (a 429, a timeout, or a partial tile at the head of the log that has no full tile yet), the entry is treated as unverified rather than invalid: it is marked <code>inclusion: unverified</code> and delivery continues. Only a hash mismatch drops the tile; <code>certstream_static_ct_inclusion_unavailable</code> and <code>certstream_static_ct_inclusion_failed</code> count the two cases.</p>
+                <p>Verification fetches share the per-operator rate limit with ingest, so ingest gets a smaller share of it. Consistency is anchored on the first checkpoint of each process, so a restart re-anchors.</p>
             </div>
         </section>
 
@@ -410,7 +409,6 @@ curl -N 'http://localhost:8080/sse?stream=lite&amp;domain=example.com&amp;issuer
                     <h2>Names tiles</h2>
                 </div>
                 <p style="margin-bottom: 1rem;">Some static-CT logs serve an optional extension that publishes the names on the certificates in a data tile as compact JSON lines. Set <code>CERTSTREAM_STATIC_CT_NAMES_TILES=prefer</code> to read those instead of parsing data tiles; logs that do not serve the extension fall back to the normal path automatically.</p>
-                <p>Measured on Geomys' Tuscolo, a names tile is roughly 3% of the size of the equivalent data tile (6.6 KB against 226 KB) and requires no X.509 parsing.</p>
                 <p>Names-tile data is not authenticated by the CT tree: the extension cannot be checked for inclusion in a signed tree head. Entries collected this way are published as <code>message_type: "dns_entries_unauthenticated"</code>, never as <code>dns_entries</code>. Cross-log dedup is unavailable in this mode, since there is no certificate hash to dedup on.</p>
                 <p>A names tile carries no certificate, so this mode requires <code>domains_only</code> to be the only enabled stream and cannot be combined with the JetStream output. These combinations are rejected during configuration validation.</p>
             </div>
@@ -423,14 +421,9 @@ curl -N 'http://localhost:8080/sse?stream=lite&amp;domain=example.com&amp;issuer
                     <p>Durable delivery for consumers that may disconnect.</p>
                 </div>
                 <p style="margin-bottom: 1rem;">A WebSocket subscriber misses whatever arrives while it is disconnected. Enable <code>CERTSTREAM_NATS_ENABLED=true</code> and records are also published to JetStream, where a durable consumer resumes from where it stopped.</p>
-                <p>To reduce record loss and duplicate delivery, the JetStream path uses three additional mechanisms:</p>
-                <ul style="margin: 0 0 1rem 1.25rem;">
-                    <li><strong>The saved position follows acknowledgements, not reads.</strong> A watcher that has read to entry N but had only M acknowledged persists M, and a restart re-reads <code>M..N</code>. The tracker advances on the contiguous acknowledged prefix, so an out-of-order acknowledgement cannot step over a gap.</li>
-                    <li><strong>Republished records keep a stable identity.</strong> The <code>Nats-Msg-Id</code> is <code>&lt;log_id&gt;:&lt;index&gt;</code>, the same address the v2 output uses, so a re-read after a restart is deduplicated by the server inside its duplicate window (15 minutes by default) instead of appearing twice.</li>
-                    <li><strong>Stream-full behavior is configurable.</strong> The stream is created with <code>discard: new</code>, so it refuses the write rather than deleting records a stopped consumer had not read. <code>CERTSTREAM_NATS_ON_FULL</code> decides what happens next: <code>block</code> (default) retries the record until the server stores it, and the queue behind it pushes back on ingest; <code>drop</code> gives up on the record and lets the position move past it.</li>
-                </ul>
+                <p>The saved position follows acknowledgements, not reads, so a restart re-reads anything unacknowledged. Records carry a stable <code>Nats-Msg-Id</code> (<code>&lt;log_id&gt;:&lt;index&gt;</code>), so re-reads are deduplicated by the server. When the stream is full, <code>CERTSTREAM_NATS_ON_FULL</code> chooses <code>block</code> (default, pushes back on ingest) or <code>drop</code>.</p>
                 <p>Records are published to <code>certstream.&lt;operator&gt;.&lt;log&gt;</code>, so a consumer can subscribe to one operator or one log rather than the whole feed.</p>
-                <p>Cross-log dedup does not apply to the durable path. A record is addressed by <code>(log_id, index)</code>, so a certificate present in three logs produces three records; dropping the duplicates would leave gaps in those logs' acknowledged positions. The live WebSocket and SSE streams still deduplicate.</p>
+                <p>Cross-log dedup does not apply to the durable path: a certificate present in three logs produces three records.</p>
                 <p>Delivery is at-least-once for the entries this server reads, not exactly-once end to end. Records discarded in <code>drop</code> mode are not retried, and entries that fail to parse produce no record.</p>
             </div>
         </section>
@@ -449,7 +442,7 @@ curl -N 'http://localhost:8080/sse?stream=lite&amp;domain=example.com&amp;issuer
                         <tr><td><code>--out</code></td><td>Output file; omit it or pass <code>-</code> for stdout</td></tr>
                     </tbody>
                 </table>
-                <p style="margin-top: 1rem;">Writes one v2 record per line. The index range is fixed before the first request, making the job finite and repeatable, and the live state file is never written, so a backfill cannot move the position of a running server. Supports both RFC 6962 <code>get-entries</code> and static-CT data tiles, using the same per-operator rate limit as the watchers. Chain certificates are omitted for static-CT logs, which serve issuers from a separate endpoint. Exits non-zero if any fetch failed.</p>
+                <p style="margin-top: 1rem;">Writes one v2 record per line. The range is fixed up front and the live state file is never written, so a backfill cannot move a running server's position. Exits non-zero if any fetch failed.</p>
             </div>
         </section>
 
@@ -825,24 +818,7 @@ sudo systemctl enable --now certstream-server-rust</pre>
                     <div class="stat-cell"><div class="num">168<span class="unit">MB</span></div><div class="lbl">RSS, mean (196 MB peak)</div></div>
                     <div class="stat-cell"><div class="num">0</div><div class="lbl">Messages missed by subscribers</div></div>
                 </div>
-                <p style="margin-top: 1rem;">Throughput and resource use do not describe how current the stream is. Over the same run the median log sat about 20 minutes behind its head, and 19 of 45 logs were more than 5,000 entries behind, with no subscriber loss and no runaway growth. The delay rose during initial catch-up, peaked near 29 minutes, and then held. <code>certstream_ct_log_ingest_delay_seconds</code> and <code>certstream_ct_log_lag_entries</code> report both figures per log; <code>soak/measure.sh</code> samples them alongside CPU and RSS.</p>
-                <h3>Keeping up with the logs</h3>
-                <p>Each operator has one request interval shared by all of its logs, <code>ct_log.default_operator_rate_limit_ms</code> (25 ms). That is the fastest an operator is asked. Operators answer a share of requests with 429 whatever the pace, so every 20 requests the interval is judged: if a quarter or more were refused it slows by a quarter, up to one second, and it speeds up by a tenth each second once the operator has been quiet for five seconds. The value in force is exported as <code>certstream_operator_request_interval_ms</code>. A <code>Retry-After</code> in seconds or as an HTTP date is waited out by the log that received it, and a 429 without one waits five seconds.</p>
-                <p>Two 8 minute runs from a clean state with no subscribers, measured against each log's own checkpoint, read 67% and 78% of the entries the logs produced, using 0.16 to 0.18 of one core and 53 to 58 MB of resident memory. Share read per operator, from the two runs:</p>
-                <table class="endpoints-table">
-                    <thead><tr><th>Operator</th><th>Share of new entries read</th></tr></thead>
-                    <tbody>
-                        <tr><td>Geomys, Let's Encrypt, IPng Networks, Microsec</td><td>1.00</td></tr>
-                        <tr><td>Google</td><td>0.64 to 0.78</td></tr>
-                        <tr><td>DigiCert</td><td>0.48 to 0.59</td></tr>
-                        <tr><td>Sectigo</td><td>0.43 to 0.55</td></tr>
-                        <tr><td>TrustAsia</td><td>0.38 to 0.58</td></tr>
-                    </tbody>
-                </table>
-                <p>The shares move from run to run with the load the operators are under; DigiCert read 0.95 to 1.02 in two earlier runs. DigiCert serves 25 entries per request and Google 32, so both need many requests per second. Geomys applies a global limit of 75 requests per second to clients that give neither an email nor a URL, so the default User-Agent carries the project URL. Set <code>ct_log.operator_rate_limits</code> to hold an operator to a gentler pace, and watch <code>certstream_ct_log_rate_limited_total</code>.</p>
-                <p style="margin-top: 24px; color: var(--ink-3); font-size: 0.9rem; max-width: 70ch;">
-                    Results are specific to this benchmark and will vary by host and workload.
-                </p>
+                <p style="margin-top: 1rem;">Throughput does not say how current the stream is. Watch <code>certstream_ct_log_lag_entries</code> and <code>certstream_ct_log_ingest_delay_seconds</code> per log; sustained growth is the signal. Results vary by host and workload.</p>
             </div>
         </section>
 
