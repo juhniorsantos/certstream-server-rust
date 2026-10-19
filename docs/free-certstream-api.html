@@ -371,9 +371,11 @@ certstream.listen_for_events(on_message, url="wss://api.certstream.dev/lite")</p
             .catch(function () { $('live-status').textContent = 'Live numbers are unavailable right now.'; });
         }
 
-        poll();
+        function pollTwice() { poll(); setTimeout(poll, 2000); }
+
+        pollTwice();
         setInterval(poll, 5000);
-        document.addEventListener('visibilitychange', function () { prev = null; poll(); });
+        document.addEventListener('visibilitychange', function () { prev = null; pollTwice(); });
       })();
     </script>
 </body>
