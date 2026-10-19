@@ -516,7 +516,7 @@ curl -H <span class="str">"Authorization: Bearer your-token"</span> http://local
             </div>
         </section>
 
-        <section>
+        <section id="run-your-own-instance">
             <div class="wrap">
                 <div class="section-header">
                     <h2>Run your own instance</h2>
@@ -565,10 +565,45 @@ docker compose up -d</pre>
       - ./state:/app/state
     <span class="str">restart</span>: unless-stopped</pre>
                 </div>
+                <div class="code-examples" style="margin-top: 20px;">
+                    <div class="code-example">
+                        <div class="code-example-header">
+                            <span class="lang">Debian / Ubuntu</span>
+                            <span class="tag">signed apt repository</span>
+                        </div>
+                        <pre class="wrap">sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://reloading01.github.io/packages/key.gpg \
+  | sudo tee /etc/apt/keyrings/certstream.asc &gt; /dev/null
+echo "deb [signed-by=/etc/apt/keyrings/certstream.asc] https://reloading01.github.io/packages/apt stable main" \
+  | sudo tee /etc/apt/sources.list.d/certstream.list
+sudo apt update
+sudo apt install certstream-server-rust
+sudo systemctl enable --now certstream-server-rust</pre>
+                    </div>
+                    <div class="code-example">
+                        <div class="code-example-header">
+                            <span class="lang">Fedora / RHEL / openSUSE</span>
+                            <span class="tag">signed rpm repository</span>
+                        </div>
+                        <pre class="wrap">sudo rpm --import https://reloading01.github.io/packages/key.gpg
+sudo tee /etc/yum.repos.d/certstream.repo &gt; /dev/null &lt;&lt;'REPO'
+[certstream]
+name=certstream-server-rust
+baseurl=https://reloading01.github.io/packages/rpm
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://reloading01.github.io/packages/key.gpg
+REPO
+sudo dnf install certstream-server-rust
+sudo systemctl enable --now certstream-server-rust</pre>
+                    </div>
+                </div>
+                <p style="margin-top: 1rem;">The <code>.deb</code> and <code>.rpm</code> files are also attached to each GitHub release. The packaged systemd unit runs under <code>DynamicUser</code>, stores CT log positions in <code>/var/lib/certstream</code>, and reads settings from <code>/etc/default/certstream-server-rust</code>.</p>
             </div>
         </section>
 
-        <section>
+        <section id="environment-variables">
             <div class="wrap">
                 <div class="section-header">
                     <h2>Environment variables</h2>
@@ -769,6 +804,19 @@ docker compose up -d</pre>
     <span class="str">url</span>: <span class="str">"https://mon.sycamore.ct.letsencrypt.org/2026h1/"</span></pre>
                 </div>
                 <p style="margin-top: 1rem;">Config search order: <code>CERTSTREAM_CONFIG</code> env var → <code>./config.yaml</code> → <code>./config.yml</code> → <code>/etc/certstream/config.yaml</code></p>
+                <p>The full set of <code>rate_limit</code> keys is <code>max_tokens</code>, <code>refill_rate</code>, <code>burst</code>, <code>window_seconds</code>, <code>window_max_requests</code> and <code>burst_window_seconds</code>. Rate limiting is per source IP: authentication controls who may connect, rate limiting controls request frequency.</p>
+
+                <h3>Hybrid tile fetching without checkpoints</h3>
+                <p>Some RFC 6962 logs expose static-CT tile data but do not publish <code>/checkpoint</code>. For those, <code>tree_size_source: get_sth</code> takes the tree size from <code>/ct/v1/get-sth</code> and fetches entries from <code>/tile/data</code>. The override replaces the catalog-discovered RFC 6962 watcher for the same <code>log_id</code>, so the log is fetched once.</p>
+                <pre class="wrap"><span class="str">static_logs</span>:
+  - <span class="str">name</span>: <span class="str">"TrustAsia log2026a"</span>
+    <span class="str">url</span>: <span class="str">"https://ct2026-a.trustasia.com/log2026a"</span>
+    <span class="str">expected_log_id</span>: <span class="str">"dNudWPfUfp39eHoWKpkcGM9pjafHKZGMmhiwRQ26RLw="</span>
+    <span class="str">tree_size_source</span>: <span class="str">get_sth</span></pre>
+                <p>Without a checkpoint the server cannot verify the log itself and warns at startup. The watcher stops at the last full tile, so the newest 0-255 entries wait until the tile completes when partial tiles are unavailable. An override for a catalog-discovered log inherits its operator name; for a local log, set <code>operator</code> explicitly to use a specific rate-limit bucket.</p>
+
+                <h3>Forcing HTTP/1.1 for an operator</h3>
+                <p>Some CT operators apply limits per TCP connection, and with HTTP/2 several watchers on one host share a single connection and quota. Operators listed under <code>force_http1_operators</code> use a dedicated HTTP/1.1 client. This does not raise the outbound request rate: the per-operator token bucket still gates requests and HTTP/1.1 only spreads them across connections. Matching is case-insensitive and ignores punctuation, and unmatched names are reported at startup.</p>
             </div>
         </section>
 
@@ -872,6 +920,7 @@ docker compose up -d</pre>
                     </tbody>
                 </table>
                 <p>The current workload settles at roughly 80 MB RSS while processing about 420 certificates per second. If process RSS is much higher than jemalloc's <code>allocated</code> or <code>resident</code> counters, check the host's Transparent Huge Pages setting with <code>cat /sys/kernel/mm/transparent_hugepage/enabled</code>.</p>
+                <p>The binary ships with jemalloc defaults <code>thp:never,narenas:4,background_thread:true,dirty_decay_ms:5000,muzzy_decay_ms:5000</code>. <code>thp:never</code> avoids resident-memory inflation on hosts with THP set to <code>always</code>. Override them without rebuilding through <code>_RJEM_MALLOC_CONF</code>, for example <code>_RJEM_MALLOC_CONF=dirty_decay_ms:30000,muzzy_decay_ms:30000</code>. Dedup memory scales with ingest rate and TTL and is bounded by <code>dedup.capacity</code>; <code>certstream_dedup_effective_ttl_seconds</code> reports the active window.</p>
             </div>
         </section>
 
